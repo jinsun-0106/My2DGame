@@ -17,6 +17,9 @@ namespace MyBird
         #region Unity Event Method
         private void Update()
         {
+            if (GameManager.IsDeath)
+            { return; }
+
             //그라운드 롤링 이동
             RollingMove();
         }
