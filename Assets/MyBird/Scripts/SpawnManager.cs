@@ -14,7 +14,7 @@ namespace MyBird
 
         //스폰 타이머
         [SerializeField]
-        private float spawnTimer = 1f;
+        private float spawnTimer = 1.5f;
         private float countdown = 0f;
 
         //스폰 높이 - 랜덤 범위 설정 값
@@ -24,6 +24,12 @@ namespace MyBird
         #endregion
 
         #region Unity Event Method
+        private void Start()
+        {
+            //초기화
+            spawnTimer = 1.5f;
+        }
+
         private void Update()
         {
             //대기 중에 스폰 안하기
@@ -39,6 +45,7 @@ namespace MyBird
 
                 //타이머 초기화
                 countdown = 0f;
+                spawnTimer = 1f - GameManager.spawnValue;
             }
             
         }
