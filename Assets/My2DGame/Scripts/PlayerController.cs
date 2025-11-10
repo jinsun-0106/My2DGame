@@ -12,26 +12,31 @@ namespace My2DGame
         //참조
         private Rigidbody2D rb2D;
         private Animator animator;
+        private TouchingDirection touchingDirections;
 
         //이동 속도 - 걷는 속도
-        [SerializeField]
-        private float walkSpeed = 3f;
-
+        [SerializeField]private float walkSpeed = 3f;
         //이동속도 - 뛰는 속도
-        [SerializeField]
-        private float runSpeed = 6f;
+        [SerializeField]private float runSpeed = 6f;
+        //점프
+        [SerializeField] private float jumpForce = 5f;
+        //점프했을 때 스피드
+        [SerializeField] private float airSpeed = 2f;
 
         //이동 입력값
         private Vector2 inputMove = Vector2.zero;
 
         //걷기 애니메이션
         private bool isMove = false;
-
         //뛰기 애니메이션
         private bool isRun = false;
-
         //반전
         private bool isFacingRight = true;
+
+        //이단 점프
+        private bool canDoubleJump = false;
+
+
 
         #endregion
 
@@ -77,15 +82,27 @@ namespace My2DGame
         {
             get
             {
-                if(IsMove)    //이동 가능
+                if(CannotMove)          //애니메이터 파라미터 값 읽어오기
                 {
-                    if(IsRun)
+                    return 0f;
+                }
+
+                if(IsMove && touchingDirections.IsWall == false)    //이동 가능
+                {
+                    if(touchingDirections.IsGround)            //땅에 있을 때
                     {
-                        return runSpeed;
+                        if(IsRun)
+                    {
+                            return runSpeed;
+                        }
+                    else
+                        {
+                            return walkSpeed;
+                        }
                     }
                     else
                     {
-                        return walkSpeed;
+                        return airSpeed;
                     }
                 }
                 else    //이동 불가
@@ -94,6 +111,16 @@ namespace My2DGame
                 }
             }
         }
+
+        //애니메이터의 파라미터값(CannotMove) 읽어오기
+        public bool CannotMove
+        {
+            get
+            {
+                return animator.GetBool(AnimationString.CannotMove);
+            }
+        }
+
         #endregion
 
         #region Unity Event Method
@@ -105,6 +132,8 @@ namespace My2DGame
             //애니메이션 참조
             animator = this.GetComponent<Animator>();
 
+            touchingDirections = this.GetComponent<TouchingDirection>();
+
         }
 
         private void FixedUpdate()
@@ -113,6 +142,15 @@ namespace My2DGame
             //좌우이동
             rb2D.linearVelocity = new Vector2(inputMove.x * CurrentMoveSpeed, rb2D.linearVelocity.y);
             //rb2D.linearVelocity = new Vector2(inputMove.x * walkSpeed, inputMove.y * walkSpeed);          //좌우위아래 이동
+
+            //점프 애니메이션
+            animator.SetFloat(AnimationString.YVelocity, rb2D.linearVelocityY);
+
+            //
+            if(touchingDirections.IsGround)
+            {
+                canDoubleJump = false;
+            }
 
         }
 
@@ -132,6 +170,7 @@ namespace My2DGame
             }
         }
 
+        //이동 입력 처리
         public void PlayerMove(InputAction.CallbackContext context)
         {
             inputMove = context.ReadValue<Vector2>();
@@ -143,6 +182,7 @@ namespace My2DGame
             SetFacingDirection(inputMove);
         }
 
+        //런 입력 처리
         public void PlayerRun(InputAction.CallbackContext context)
         {
             if(context.started)     //버튼을 눌렀을 때 (누르기 시작했을 때)
@@ -155,16 +195,35 @@ namespace My2DGame
             }
         }
 
+        //점프 입력 처리
         public void PlayerJump(InputAction.CallbackContext context)
         {
-            if (context.started)     //버튼을 눌렀을 때 (누르기 시작했을 때)
+            if (context.started)     //버튼을 눌렀을 때만 처리
             {
-                animator.SetTrigger("JumpTrigger");
-                rb2D.gravityScale = -1f;
+                if(touchingDirections.IsGround && canDoubleJump == false)
+                {
+                    animator.SetTrigger(AnimationString.JumpTrigger);
+                    rb2D.linearVelocity = new Vector2(rb2D.linearVelocity.x, jumpForce);
+
+                    canDoubleJump = true;
+                }
+                else if (canDoubleJump && touchingDirections.IsGround == false)
+                {
+                    animator.SetTrigger(AnimationString.JumpTrigger);
+                    rb2D.linearVelocity = new Vector2(rb2D.linearVelocity.x, jumpForce);
+
+                    canDoubleJump = false;
+                }
             }
-            else if (context.canceled)   //버튼을 뗄 때
+        }
+
+        //공격1 입력 처리
+        public void PlayerAttack(InputAction.CallbackContext context)
+        {
+            if(context.started && touchingDirections.IsGround)
             {
-                rb2D.gravityScale = 1f;
+                animator.SetTrigger(AnimationString.AttackTrigger);
+
             }
         }
 

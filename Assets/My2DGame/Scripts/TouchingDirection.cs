@@ -1,4 +1,3 @@
-using Unity.VisualScripting;
 using UnityEngine;
 
 namespace My2DGame
@@ -50,7 +49,7 @@ namespace My2DGame
             get { return isCelling; }
             private set
             {
-                isGround = value;
+                isCelling = value;
                 //애니 파라미터 세팅
             }
         }

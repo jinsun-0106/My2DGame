@@ -1,3 +1,4 @@
+using System.Globalization;
 using UnityEngine;
 
 namespace My2DGame
@@ -10,5 +11,9 @@ namespace My2DGame
         public static string IsMove = "IsMove";
         public static string IsRun = "IsRun";
         public static string IsGrounded = "IsGrounded";
+        public static string JumpTrigger = "JumpTrigger";
+        public static string YVelocity = "YVelocity";
+        public static string AttackTrigger = "AttackTrigger";
+        public static string CannotMove = "CannotMove";
     }
 }
