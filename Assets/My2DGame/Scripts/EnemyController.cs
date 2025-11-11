@@ -13,6 +13,10 @@ namespace My2DGame
         private Rigidbody2D rb2D;
         private TouchingDirection touchingDirections;
         private Animator animator;
+        private Damageable damageable;
+
+        //적 감지
+        public DetectionZone detectionZone;
 
         //이동 속도
         [SerializeField] private float runSpeed = 4f;
@@ -29,6 +33,13 @@ namespace My2DGame
 
         //현재 이동 방향
         private WalkableDirection walkDirection = WalkableDirection.Right;
+
+        //감속 Lerp 계수
+        [SerializeField] private float stopRate = 0.2f;
+
+        //적 감지 - 타겟이 있다
+        private bool hasTarget = false;
+
         #endregion
 
         #region Property
@@ -57,6 +68,37 @@ namespace My2DGame
                 walkDirection = value; 
             }
         }
+
+        //애니메이터의 파라미터값(CannotMove) 읽어오기
+        public bool CannotMove
+        {
+            get
+            {
+                return animator.GetBool(AnimationString.CannotMove);
+            }
+        }
+
+        //애니메이터의 파라미터값(LockVelocity) 읽어오기
+        public bool LockVelocity
+        {
+            get
+            {
+                return animator.GetBool(AnimationString.LockVelocity);
+            }
+        }
+
+        //적 감지
+        public bool HasTarget
+        {
+            get { return hasTarget; }
+            set
+            {
+                hasTarget = value;
+                animator.SetBool(AnimationString.HasTarget, value);
+            }
+
+        }
+
         #endregion
 
         #region Unity Event Method
@@ -66,18 +108,36 @@ namespace My2DGame
             rb2D = GetComponent<Rigidbody2D> ();
             touchingDirections = GetComponent<TouchingDirection> ();
             animator = GetComponent<Animator> ();
+            damageable = this.GetComponent<Damageable>();
+
+            //이벤트 함수 등록
+            damageable.hitAction += OnHit;
+        }
+
+        private void Update()
+        {
+            //적 감지
+            HasTarget = (detectionZone.detectedColliders.Count > 0);
         }
 
         private void FixedUpdate()
         {
             //벽 체크
-            if(touchingDirections.IsWall && touchingDirections.IsGround)
+            if (touchingDirections.IsWall && touchingDirections.IsGround)
             {
                 Flip();
             }
 
             //이동하기
-            rb2D.linearVelocity = new Vector2(directionVector.x * runSpeed, rb2D.linearVelocityY);
+            if (CannotMove)         //cannotmove가 참이면 움직이지 X
+            {
+                //감속 rb2D.linearVelocityX -> 0
+                rb2D.linearVelocity = new Vector2(Mathf.Lerp(rb2D.linearVelocityX, 0f, stopRate), rb2D.linearVelocityY);
+            }
+            else
+            {
+                rb2D.linearVelocity = new Vector2(directionVector.x * runSpeed, rb2D.linearVelocityY);
+            }
         }
 
         #endregion
@@ -98,6 +158,13 @@ namespace My2DGame
             {
                 Debug.Log("Error Flip Direction");
             }
+        }
+
+
+        //데미지 이벤트에 등록되는 함수
+        public void OnHit(float damage, Vector2 knokback)
+        {
+            rb2D.linearVelocity = new Vector2(knokback.x, rb2D.linearVelocityY + knokback.y);
         }
 
 

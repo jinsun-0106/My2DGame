@@ -13,6 +13,7 @@ namespace My2DGame
         private Rigidbody2D rb2D;
         private Animator animator;
         private TouchingDirection touchingDirections;
+        private Damageable damageable;
 
         //이동 속도 - 걷는 속도
         [SerializeField]private float walkSpeed = 3f;
@@ -121,18 +122,28 @@ namespace My2DGame
             }
         }
 
+        //애니메이터의 파라미터값(LockVelocity) 읽어오기
+        public bool LockVelocity
+        {
+            get
+            {
+                return animator.GetBool(AnimationString.LockVelocity);
+            }
+        }
+
         #endregion
 
         #region Unity Event Method
         private void Awake()
         {
             //참조
-            rb2D = this.GetComponent<Rigidbody2D>();
-
-            //애니메이션 참조
+            rb2D = this.GetComponent<Rigidbody2D>();            
             animator = this.GetComponent<Animator>();
-
             touchingDirections = this.GetComponent<TouchingDirection>();
+            damageable = this.GetComponent<Damageable>();
+
+            //이벤트 함수 등록
+            damageable.hitAction += OnHit;
 
         }
 
@@ -140,17 +151,15 @@ namespace My2DGame
         {
 
             //좌우이동
-            rb2D.linearVelocity = new Vector2(inputMove.x * CurrentMoveSpeed, rb2D.linearVelocity.y);
-            //rb2D.linearVelocity = new Vector2(inputMove.x * walkSpeed, inputMove.y * walkSpeed);          //좌우위아래 이동
+            if(LockVelocity == false)
+            {
+                rb2D.linearVelocity = new Vector2(inputMove.x * CurrentMoveSpeed, rb2D.linearVelocity.y);
+                //rb2D.linearVelocity = new Vector2(inputMove.x * walkSpeed, inputMove.y * walkSpeed);          //좌우위아래 이동
+            }
 
             //점프 애니메이션
             animator.SetFloat(AnimationString.YVelocity, rb2D.linearVelocityY);
 
-            //
-            if(touchingDirections.IsGround)
-            {
-                canDoubleJump = false;
-            }
 
         }
 
@@ -160,6 +169,9 @@ namespace My2DGame
         //반향 전환
         void SetFacingDirection(Vector2 moveInput)
         {
+            if(CannotMove)
+                { return; }
+
             if(moveInput.x > 0f && IsFacingRight == false)            //오른쪽으로 이동
             {
                 IsFacingRight = true;
@@ -198,14 +210,15 @@ namespace My2DGame
         //점프 입력 처리
         public void PlayerJump(InputAction.CallbackContext context)
         {
-            if (context.started)     //버튼을 눌렀을 때만 처리
+            if (context.started)
             {
-                if(touchingDirections.IsGround && canDoubleJump == false)
+                if (touchingDirections.IsGround && canDoubleJump == false)
                 {
                     animator.SetTrigger(AnimationString.JumpTrigger);
                     rb2D.linearVelocity = new Vector2(rb2D.linearVelocity.x, jumpForce);
 
                     canDoubleJump = true;
+
                 }
                 else if (canDoubleJump && touchingDirections.IsGround == false)
                 {
@@ -226,6 +239,13 @@ namespace My2DGame
 
             }
         }
+
+        //데미지 이벤트에 등록되는 함수
+        public void OnHit(float damage, Vector2 knokback)
+        {
+            rb2D.linearVelocity = new Vector2(knokback.x, rb2D.linearVelocityY + knokback.y);
+        }
+
 
         #endregion
     }

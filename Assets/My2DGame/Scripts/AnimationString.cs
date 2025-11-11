@@ -15,5 +15,9 @@ namespace My2DGame
         public static string YVelocity = "YVelocity";
         public static string AttackTrigger = "AttackTrigger";
         public static string CannotMove = "CannotMove";
+        public static string HasTarget = "HasTarget";
+        public static string HitTrigger = "HitTrigger";
+        public static string IsDeath = "IsDeath";
+        public static string LockVelocity = "LockVelocity";
     }
 }
