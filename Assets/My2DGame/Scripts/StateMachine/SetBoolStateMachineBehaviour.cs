@@ -4,7 +4,7 @@ namespace My2DGame
 {
     /// <summary>
     /// 애니메이터 bool 타입 파라미터 값을 설정하는 클래스
-    /// 애니메이터의 Sub StateMachine에서 들어갈 때와 나갈 대 값 설정
+    /// 애니메이터의 Sub StateMachine에서 들어갈 때와 나갈 때 값 설정
     /// </summary>
     public class SetBoolStateMachineBehaviour : StateMachineBehaviour
     {

@@ -17,6 +17,8 @@ namespace My2DGame
 
         //적 감지
         public DetectionZone detectionZone;
+        //그라운드 감지
+        public DetectionZone detectionGround;
 
         //이동 속도
         [SerializeField] private float runSpeed = 4f;
@@ -78,6 +80,19 @@ namespace My2DGame
             }
         }
 
+        //공격 쿨 타임 - 애니메이션 파라미터 값 세팅
+        public float CoolDownTime
+        {
+            get
+            {
+                return animator.GetFloat(AnimationString.CoolDownTime);
+            }
+            set
+            {
+                animator.SetFloat(AnimationString.CoolDownTime, value);
+            }
+        }
+
         //애니메이터의 파라미터값(LockVelocity) 읽어오기
         public bool LockVelocity
         {
@@ -112,12 +127,23 @@ namespace My2DGame
 
             //이벤트 함수 등록
             damageable.hitAction += OnHit;
+
+            //DetectionZone 이벤트 함수 등록
+            detectionGround.noRemainColliders += OnCliffeDetection;
         }
 
         private void Update()
         {
             //적 감지
             HasTarget = (detectionZone.detectedColliders.Count > 0);
+
+            //공격 쿨 다운 타이머
+            if(CoolDownTime > 0f)
+            {
+                CoolDownTime -= Time.deltaTime;
+            }
+
+
         }
 
         private void FixedUpdate()
@@ -129,14 +155,17 @@ namespace My2DGame
             }
 
             //이동하기
-            if (CannotMove)         //cannotmove가 참이면 움직이지 X
+            if(LockVelocity == false)
             {
-                //감속 rb2D.linearVelocityX -> 0
-                rb2D.linearVelocity = new Vector2(Mathf.Lerp(rb2D.linearVelocityX, 0f, stopRate), rb2D.linearVelocityY);
-            }
-            else
-            {
-                rb2D.linearVelocity = new Vector2(directionVector.x * runSpeed, rb2D.linearVelocityY);
+                if (CannotMove)         //cannotmove가 참이면 움직이지 X
+                {
+                    //감속 rb2D.linearVelocityX -> 0
+                    rb2D.linearVelocity = new Vector2(Mathf.Lerp(rb2D.linearVelocityX, 0f, stopRate), rb2D.linearVelocityY);
+                }
+                else
+                {
+                    rb2D.linearVelocity = new Vector2(directionVector.x * runSpeed, rb2D.linearVelocityY);
+                }
             }
         }
 
@@ -165,6 +194,15 @@ namespace My2DGame
         public void OnHit(float damage, Vector2 knokback)
         {
             rb2D.linearVelocity = new Vector2(knokback.x, rb2D.linearVelocityY + knokback.y);
+        }
+
+        //디텍션 이벤트에 등록되는 함수
+        public void OnCliffeDetection()
+        {
+            if (touchingDirections.IsGround)
+            {
+                Flip();
+            }
         }
 
 

@@ -118,6 +118,9 @@ AnimatorStateTransition:
   - m_ConditionMode: 1
     m_ConditionEvent: HasTarget
     m_EventTreshold: 0
+  - m_ConditionMode: 4
+    m_ConditionEvent: CoolDownTime
+    m_EventTreshold: 0.0001
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: 0}
   m_Solo: 0
@@ -183,7 +186,13 @@ AnimatorTransition:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: 
-  m_Conditions: []
+  m_Conditions:
+  - m_ConditionMode: 1
+    m_ConditionEvent: HasTarget
+    m_EventTreshold: 0
+  - m_ConditionMode: 4
+    m_ConditionEvent: CoolDownTime
+    m_EventTreshold: 0.0001
   m_DstStateMachine: {fileID: -1043632609769141879}
   m_DstState: {fileID: 0}
   m_Solo: 0
@@ -203,6 +212,7 @@ AnimatorState:
   m_Transitions: []
   m_StateMachineBehaviours:
   - {fileID: -8103285225310849037}
+  - {fileID: 1452711362044705133}
   m_Position: {x: 50, y: 50, z: 0}
   m_IKOnFeet: 0
   m_WriteDefaultValues: 1
@@ -235,6 +245,7 @@ AnimatorStateMachine:
   m_StateMachineTransitions: {}
   m_StateMachineBehaviours:
   - {fileID: 9053282714792216864}
+  - {fileID: 1044900120554876039}
   m_AnyStatePosition: {x: 50, y: -40, z: 0}
   m_EntryPosition: {x: 50, y: 120, z: 0}
   m_ExitPosition: {x: 800, y: 120, z: 0}
@@ -279,6 +290,12 @@ AnimatorController:
     m_DefaultInt: 0
     m_DefaultBool: 0
     m_Controller: {fileID: 9100000}
+  - m_Name: CoolDownTime
+    m_Type: 1
+    m_DefaultFloat: 0
+    m_DefaultInt: 0
+    m_DefaultBool: 0
+    m_Controller: {fileID: 9100000}
   - m_Name: LockVelocity
     m_Type: 4
     m_DefaultFloat: 0
@@ -298,6 +315,39 @@ AnimatorController:
     m_IKPass: 0
     m_SyncedLayerAffectsTiming: 0
     m_Controller: {fileID: 9100000}
+--- !u!114 &1044900120554876039
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 879f778fa11e5f944ab4e85a23155d44, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  floatName: CoolDownTime
+  updateOnStateEnter: 0
+  updateOnStateExit: 0
+  updateOnStateMachineEnter: 1
+  updateOnStateMachineExit: 1
+  enterValue: 0
+  exitValue: 2
+--- !u!114 &1452711362044705133
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 99ab3495e5f5a1741a87871d9bfda35d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  delayTimer: 1
+  fadeTimer: 1
 --- !u!1107 &1786136124930425995
 AnimatorStateMachine:
   serializedVersion: 6
@@ -309,7 +359,7 @@ AnimatorStateMachine:
   m_ChildStates:
   - serializedVersion: 1
     m_State: {fileID: 6149288749628765078}
-    m_Position: {x: 390, y: 80, z: 0}
+    m_Position: {x: 390, y: 100, z: 0}
   m_ChildStateMachines: []
   m_AnyStateTransitions: []
   m_EntryTransitions: []
@@ -412,12 +462,12 @@ AnimatorStateMachine:
   - {fileID: -4105275631117504201}
   m_EntryTransitions: []
   m_StateMachineTransitions:
-  - first: {fileID: -1043632609769141879}
-    second:
-    - {fileID: -4830313280750318102}
   - first: {fileID: 1786136124930425995}
     second:
     - {fileID: -1660181655578107108}
+  - first: {fileID: -1043632609769141879}
+    second:
+    - {fileID: -4830313280750318102}
   m_StateMachineBehaviours: []
   m_AnyStatePosition: {x: 730, y: 60, z: 0}
   m_EntryPosition: {x: 50, y: 120, z: 0}

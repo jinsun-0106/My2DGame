@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
+using UnityEngine.Events;
 
 namespace My2DGame
 {
@@ -11,6 +12,9 @@ namespace My2DGame
         #region Variables
         //감지된 충돌체 리스트
         public List<Collider2D> detectedColliders = new List<Collider2D>();
+
+        //모든 충돌체의 갯수가 0이 되는 순간 호출되는 이벤트 함수
+        public UnityAction noRemainColliders;
         #endregion
 
         #region Property
@@ -29,11 +33,11 @@ namespace My2DGame
         {
             //충돌체가 나가면 리스트에서 제거
             detectedColliders.Remove(collision);
+
+            //더 이상 충돌체 리스트에 아무것도 없을 때
+            noRemainColliders?.Invoke();
         }
         #endregion
 
-        #region Custom Method
-
-        #endregion
     }
 }
