@@ -14,6 +14,7 @@ namespace My2DGame
         private Canvas gameCanvas;
 
         public GameObject damageTextPrefab;             //데미지 텍스트 연출 프리팹
+        public GameObject healTextPrefab;               //회복 텍스트 연출 프리팹
         #endregion
 
         #region Unity Event Method
@@ -27,12 +28,14 @@ namespace My2DGame
         {
             //이벤트 함수 등록
             CharacterEvents.characterDamaged += CharacterTakeDamage;
+            CharacterEvents.gethealed += GetHeal;
         }
 
         private void OnDisable()
         {
             //이벤트 함수 해제
             CharacterEvents.characterDamaged -= CharacterTakeDamage;
+            CharacterEvents.gethealed -= GetHeal;
         }
         #endregion
 
@@ -49,6 +52,19 @@ namespace My2DGame
             //데미지값 셋팅
             TextMeshProUGUI damageText = textGo.GetComponent<TextMeshProUGUI>();
             damageText.text = damageReceived.ToString();
+        }
+
+        public void GetHeal(Transform item, float healReceived)
+        {
+            //아이템 위치로 가져오기
+            Vector3 spawnPosition = Camera.main.WorldToScreenPoint(item.position);
+
+            GameObject textGo = Instantiate(healTextPrefab, new Vector3(spawnPosition.x, spawnPosition.y, spawnPosition.z), Quaternion.identity, gameCanvas.transform);
+
+            //데미지값 셋팅
+            TextMeshProUGUI healText = textGo.GetComponent<TextMeshProUGUI>();
+            healText.text = healReceived.ToString();
+
         }
         #endregion
     }

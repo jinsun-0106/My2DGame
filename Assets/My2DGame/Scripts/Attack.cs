@@ -32,8 +32,5 @@ namespace My2DGame
         }
         #endregion
 
-        #region 
-
-        #endregion
     }
 }

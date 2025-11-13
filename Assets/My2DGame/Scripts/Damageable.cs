@@ -28,13 +28,16 @@ namespace My2DGame
 
         //데미지 입을 때 호출되는 이벤트 함수
         public UnityAction<float, Vector2> hitAction;
+
+        //힐할 때 호출되는 이벤트 함수
+        public UnityAction<float> healAction;
         #endregion
 
         #region Property
         public float CurrentHealth
         {
             get {  return currentHealth; }
-            private set
+            set
             {
                 currentHealth = value;
 
@@ -119,6 +122,30 @@ namespace My2DGame
 
             //데미지 텍스트 연출 효과
             CharacterEvents.characterDamaged?.Invoke(this.transform, damage);
+        }
+
+        //힐 하기, 힐 성골 시 true, 실패 시 false
+        public bool Heal(float healAmount)
+        {
+            //죽음 체크
+            if (isDeath) return false;
+
+            //체력 만땅 체크
+            if(CurrentHealth >= MaxHealth) return false;
+
+            //리얼 힐 값 구하기
+            float maxHeal = MaxHealth - CurrentHealth;      //최대로 힐 할 수 있는 값
+            float realHeal = (maxHeal < healAmount) ? maxHeal : healAmount;     //실제로 힐 하는 값
+
+            CurrentHealth += realHeal;
+
+            healAction?.Invoke(realHeal);
+
+            //힐 텍스트 연출 효과
+            CharacterEvents.gethealed?.Invoke(this.transform, realHeal);
+
+            return true;
+
 
         }
 
