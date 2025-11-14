@@ -3,30 +3,47 @@ using UnityEngine;
 namespace My2DGame
 {
     /// <summary>
-    /// HitBox¿¡ Ãæµ¹ÇÑ Àû¿¡°Ô µ¥¹ÌÁö¸¦ ÁÖ´À Å¬·¡½º
+    /// HitBoxì— ì¶©ëŒí•œ ì ì—ê²Œ ë°ë¯¸ì§€ë¥¼ ì£¼ëŠ í´ë˜ìŠ¤
     /// </summary>
     public class Attack : MonoBehaviour
     {
         #region Variables
-        //°ø°İ ½Ã Àû¿¡°Ô ÁÖ´Â µ¥¹ÌÁö·®
+        //ê³µê²© ì‹œ ì ì—ê²Œ ì£¼ëŠ” ë°ë¯¸ì§€ëŸ‰
         [SerializeField] private float attackDamage = 10f;
 
-        //°ø°İ ½Ã ³Ë¹é È¿°ú
+        //ê³µê²© ì‹œ ë„‰ë°± íš¨ê³¼
         [SerializeField] private Vector2 knockback = Vector2.zero;
+
+        //ê³µê²© ë°ë¯¸ì§€ ì´í™ì¸  í”„ë¦¬íŒ¹
+        public GameObject damageEffectPrefab;
+
+        [SerializeField]
+        private Vector3 effectOffset = Vector3.zero;
         #endregion
 
         #region Unity Event Method
-        private void OnTriggerEnter2D(Collider2D collision)
+        protected virtual void OnTriggerEnter2D(Collider2D collision)
         {
-            //µ¥¹ÌÁö ÁÖ±â
+            //ë°ë¯¸ì§€ ì£¼ê¸°
             Damageable damageable = collision.GetComponent<Damageable>();
 
             if (damageable != null )
             {
-                //³Ë¹é È¿°ú ¹æÇâ ¼³Á¤
-                Vector2 deliveredKnockback = this.transform.parent.localScale.x > 0f ? knockback : new Vector2(-knockback.x, knockback.y);
+                //ë„‰ë°± íš¨ê³¼ ë°©í–¥ ì„¤ì •
+                Transform directionTrans = this.transform.parent != null ? this.transform.parent : this.transform;
+
+                Vector2 deliveredKnockback = directionTrans.localScale.x > 0f ? knockback : new Vector2(-knockback.x, knockback.y);
 
                 damageable.TakeDamage(attackDamage, deliveredKnockback);
+
+                //ë°ë¯¸ì§€ ì´í™íŠ¸ ì²˜ë¦¬
+                if(damageEffectPrefab)
+                {
+                    Vector3 offset = directionTrans.localScale.x > 0f ? effectOffset : new Vector3(-effectOffset.x, effectOffset.y, effectOffset.z);
+
+                    GameObject effectGo = Instantiate(damageEffectPrefab, this.transform.position, Quaternion.identity);
+                    Destroy(effectGo, 0.4f);
+                }
             }
 
         }

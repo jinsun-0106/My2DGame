@@ -4,33 +4,39 @@ using UnityEngine.Events;
 namespace My2DGame
 {
     /// <summary>
-    /// Health¸¦ °ü¸®ÇÏ´Â Å¬·¡½º
+    /// Healthë¥¼ ê´€ë¦¬í•˜ëŠ” í´ë˜ìŠ¤
     /// </summary>
     public class Damageable : MonoBehaviour
     {
         #region Variables
-        //ÂüÁ¶
+        //ì°¸ì¡°
         private Animator animator;
+        private Renderer renderer;
 
         [SerializeField] private float currentHealth;
 
         [SerializeField] private float maxHealth = 100f;
 
-        //Á×À½ Ã¼Å©
+        //ì£½ìŒ ì²´í¬
         private bool isDeath = false;
 
-        //¹«Àû ¸ğµå
+        //ë¬´ì  ëª¨ë“œ
         private bool isInvincible = false;
-        //¹«Àû ¸ğµå Å¸ÀÌ¸Ó
+        //ë¬´ì  ëª¨ë“œ íƒ€ì´ë¨¸
         [SerializeField]
         private float invincibleTimer = 3f;
         private float countdown = 0f;
 
-        //µ¥¹ÌÁö ÀÔÀ» ¶§ È£ÃâµÇ´Â ÀÌº¥Æ® ÇÔ¼ö
+        //ë°ë¯¸ì§€ ì…ì„ ë•Œ í˜¸ì¶œë˜ëŠ” ì´ë²¤íŠ¸ í•¨ìˆ˜
         public UnityAction<float, Vector2> hitAction;
 
-        //ÈúÇÒ ¶§ È£ÃâµÇ´Â ÀÌº¥Æ® ÇÔ¼ö
+        //íí•  ë•Œ í˜¸ì¶œë˜ëŠ” ì´ë²¤íŠ¸ í•¨ìˆ˜
         public UnityAction<float> healAction;
+
+        //ë¬´ì  ëª¨ë“œ íš¨ê³¼
+        public Material invinsibleMaterial;         //ë¬´ì ëª¨ë“œ ë©”í„°ë¦¬ì–¼
+        private Material originMaterial;            //ì˜¤ë¦¬ì§€ë„ ë©”í„°ë¦¬ì–¼
+                                                    //
         #endregion
 
         #region Property
@@ -65,6 +71,7 @@ namespace My2DGame
             {
                 isDeath = value;
                 animator.SetBool(AnimationString.IsDeath, value);
+
             }
         }
         #endregion
@@ -72,30 +79,38 @@ namespace My2DGame
         #region Unity Event Method
         private void Awake()
         {
-            //ÂüÁ¶
+            //ì°¸ì¡°
             animator = GetComponent<Animator>();
+            renderer = GetComponent<Renderer>();
         }
 
         private void Start()
         {
-            //ÃÊ±âÈ­
+            //ì´ˆê¸°í™”
             CurrentHealth = MaxHealth;
+            originMaterial = renderer.material;
         }
 
         private void Update()
         {
-            //¹«Àû Å¸ÀÌ¸Ó - ¹«Àû ¸ğµå ÀÏ ¶§
+            //ì£½ìŒ ì²´í¬
+            if (IsDeath) return;
+
+            //ë¬´ì  íƒ€ì´ë¨¸ - ë¬´ì  ëª¨ë“œ ì¼ ë•Œ
             if (isInvincible)
             {
                 countdown += Time.deltaTime;
                 if (countdown >= invincibleTimer)
                 {
-                    //Å¸ÀÌ¸Ó ±¸Çö
+                    //íƒ€ì´ë¨¸ êµ¬í˜„
                     isInvincible = false;
+                    if(invinsibleMaterial != null)
+                    {
+                        renderer.material = originMaterial;
+                    }
 
-                    //Å¸ÀÌ¸Ó ÃÊ±âÈ­
+                    //íƒ€ì´ë¨¸ ì´ˆê¸°í™”
                     countdown = 0f;
-
                 }
             }
         }
@@ -105,7 +120,7 @@ namespace My2DGame
         #region Custom Method
         public void TakeDamage(float damage, Vector2 knockback)
         {
-            //Á×À½Ã¼Å©, ¹«Àû Ã¼Å©
+            //ì£½ìŒì²´í¬, ë¬´ì  ì²´í¬
             if (isDeath || isInvincible) return;
 
             CurrentHealth -= damage;
@@ -113,35 +128,41 @@ namespace My2DGame
 
             isInvincible = true;
 
-            //¾Ö´Ï¸ŞÀÌ¼Ç
+            //ë¬´ì ëª¨ë“œ íš¨ê³¼
+            if(invinsibleMaterial != null)
+            {
+                renderer.material = invinsibleMaterial;
+            }
+
+            //ì• ë‹ˆë©”ì´ì…˜
             animator.SetTrigger(AnimationString.HitTrigger);
 
-            //µ¥¹ÌÁö È¿°ú (Knockback, »ç¿îµå µîµî)
-            //hitAction ÀÌº¥Æ®¿¡ µî·ÏµÈ ÇÔ¼ö È£Ãâ
+            //ë°ë¯¸ì§€ íš¨ê³¼ (Knockback, ì‚¬ìš´ë“œ ë“±ë“±)
+            //hitAction ì´ë²¤íŠ¸ì— ë“±ë¡ëœ í•¨ìˆ˜ í˜¸ì¶œ
             hitAction?.Invoke(damage, knockback);
 
-            //µ¥¹ÌÁö ÅØ½ºÆ® ¿¬Ãâ È¿°ú
+            //ë°ë¯¸ì§€ í…ìŠ¤íŠ¸ ì—°ì¶œ íš¨ê³¼
             CharacterEvents.characterDamaged?.Invoke(this.transform, damage);
         }
 
-        //Èú ÇÏ±â, Èú ¼º°ñ ½Ã true, ½ÇÆĞ ½Ã false
+        //í í•˜ê¸°, í ì„±ê³¨ ì‹œ true, ì‹¤íŒ¨ ì‹œ false
         public bool Heal(float healAmount)
         {
-            //Á×À½ Ã¼Å©
+            //ì£½ìŒ ì²´í¬
             if (isDeath) return false;
 
-            //Ã¼·Â ¸¸¶¥ Ã¼Å©
+            //ì²´ë ¥ ë§Œë•… ì²´í¬
             if(CurrentHealth >= MaxHealth) return false;
 
-            //¸®¾ó Èú °ª ±¸ÇÏ±â
-            float maxHeal = MaxHealth - CurrentHealth;      //ÃÖ´ë·Î Èú ÇÒ ¼ö ÀÖ´Â °ª
-            float realHeal = (maxHeal < healAmount) ? maxHeal : healAmount;     //½ÇÁ¦·Î Èú ÇÏ´Â °ª
+            //ë¦¬ì–¼ í ê°’ êµ¬í•˜ê¸°
+            float maxHeal = MaxHealth - CurrentHealth;      //ìµœëŒ€ë¡œ í í•  ìˆ˜ ìˆëŠ” ê°’
+            float realHeal = (maxHeal < healAmount) ? maxHeal : healAmount;     //ì‹¤ì œë¡œ í í•˜ëŠ” ê°’
 
             CurrentHealth += realHeal;
 
             healAction?.Invoke(realHeal);
 
-            //Èú ÅØ½ºÆ® ¿¬Ãâ È¿°ú
+            //í í…ìŠ¤íŠ¸ ì—°ì¶œ íš¨ê³¼
             CharacterEvents.gethealed?.Invoke(this.transform, realHeal);
 
             return true;
